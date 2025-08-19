@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <title>תצוגת משולש</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>תצוגת משולש</h1>
+        <div class="card">
+            <svg id="svg"></svg>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const A = [Number(params.get("ax")), Number(params.get("ay"))];
+        const B = [Number(params.get("bx")), Number(params.get("by"))];
+        const C = [Number(params.get("cx")), Number(params.get("cy"))];
+
+        const svg = document.getElementById("svg");
+
+        const minX = Math.min(A[0], B[0], C[0]) - 60;
+        const maxX = Math.max(A[0], B[0], C[0]) + 60;
+        const minY = Math.min(A[1], B[1], C[1]) - 60;
+        const maxY = Math.max(A[1], B[1], C[1]) + 60;
+
+        svg.setAttribute("viewBox", `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+        // Calculating an angle between 2 sides
+        function angle(u, v) {
+            let d = (u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v));
+            d = Math.max(-1, Math.min(1, d));
+            return Math.acos(d) * 180 / Math.PI;
+        }
+
+        // Drawing the triangle
+        const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        poly.setAttribute("points", `${A} ${B} ${C}`);
+        poly.setAttribute("class", "triangle");
+        svg.appendChild(poly);
+
+        [A, B, C].forEach(p => {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", p[0]);
+            c.setAttribute("cy", p[1]);
+            c.setAttribute("r", 5);
+            c.setAttribute("class", "vertex");
+            svg.appendChild(c);
+        });
+
+        // Calculating angles
+        const alpha = angle([B[0] - A[0], B[1] - A[1]], [C[0] - A[0], C[1] - A[1]]);
+        const beta = angle([A[0] - B[0], A[1] - B[1]], [C[0] - B[0], C[1] - B[1]]);
+        const gamma = angle([A[0] - C[0], A[1] - C[1]], [B[0] - C[0], B[1] - C[1]]);
+
+        // Drawing the acr and a text by the angle
+        function arc(V, P1, P2, deg, r = 40) {
+            const a1 = Math.atan2(P1[1] - V[1], P1[0] - V[0]);
+            const a2 = Math.atan2(P2[1] - V[1], P2[0] - V[0]);
+            let sweep = a2 - a1;
+            while (sweep < -Math.PI) sweep += 2 * Math.PI;
+            while (sweep > Math.PI) sweep -= 2 * Math.PI;
+
+            const start = [V[0] + r * Math.cos(a1), V[1] + r * Math.sin(a1)];
+            const end = [V[0] + r * Math.cos(a2), V[1] + r * Math.sin(a2)];
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${start[0]},${start[1]} A ${r},${r} 0 0 ${sweep > 0 ? 1 : 0} ${end[0]},${end[1]}`);
+            path.setAttribute("class", "arc");
+            svg.appendChild(path);
+
+            // Arc Text
+            const mid = a1 + sweep / 2;
+            const tx = V[0] + (r + 15) * Math.cos(mid);
+            const ty = V[1] + (r + 15) * Math.sin(mid);
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", tx);
+            t.setAttribute("y", ty);
+            t.setAttribute("class", "angle-label");
+            t.textContent = deg.toFixed(1) + "°";
+            svg.appendChild(t);
+        }
+
+        arc(A, B, C, alpha);
+        arc(B, A, C, beta);
+        arc(C, A, B, gamma);
+    </script>
+</body>
+
+</html>

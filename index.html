@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <title>קלט נקודות – משולש</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>הזן שלוש נקודות</h1>
+        <form id="pointsForm" class="form-card">
+            <div class="point-row">
+                <label>A:</label>
+                <input type="number" id="ax" value="100" placeholder="Ax">
+                <input type="number" id="ay" value="700" placeholder="Ay">
+            </div>
+            <div class="point-row">
+                <label>B:</label>
+                <input type="number" id="bx" value="400" placeholder="Bx">
+                <input type="number" id="by" value="100" placeholder="By">
+            </div>
+            <div class="point-row">
+                <label>C:</label>
+                <input type="number" id="cx" value="700" placeholder="Cx">
+                <input type="number" id="cy" value="700" placeholder="Cy">
+            </div>
+            <button type="submit">הצג משולש</button>
+        </form>
+    </div>
+
+
+    <script>
+        document.getElementById("pointsForm").addEventListener("submit", e => {
+            e.preventDefault();
+            const params = new URLSearchParams({
+                ax: ax.value, ay: ay.value,
+                bx: bx.value, by: by.value,
+                cx: cx.value, cy: cy.value
+            });
+            window.location.href = "display.html?" + params.toString();
+        });
+    </script>
+</body>
+
+</html>
